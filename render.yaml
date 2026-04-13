@@ -19,5 +19,5 @@ services:
       - key: MONGO_URI
         sync: false # Set manually — use MongoDB Atlas connection string
       - key: CLIENT_URL
-        value: https://YOUR_RENDER_URL.onrender.com
+        value: "*"
     healthCheckPath: /api/health
