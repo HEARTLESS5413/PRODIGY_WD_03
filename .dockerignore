@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.git/
+.gitignore
+*.log
+.env
+.env.*
+.DS_Store
+backend.dev.*
+frontend.dev.*
+.dev-pids.json
+README.md

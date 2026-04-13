@@ -1,0 +1,23 @@
+# ── render.yaml ──
+# Render deployment blueprint
+# Deploy: Connect repo → Render auto-detects this file
+# Requires: MongoDB Atlas connection string set as env var
+
+services:
+  - type: web
+    name: tictactoe-server
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false # Set manually — use MongoDB Atlas connection string
+      - key: CLIENT_URL
+        value: https://YOUR_RENDER_URL.onrender.com
+    healthCheckPath: /api/health

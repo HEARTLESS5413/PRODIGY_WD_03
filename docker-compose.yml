@@ -1,0 +1,58 @@
+# ────────────────────────────────────────────────
+# Docker Compose — Tic-Tac-Toe Full Stack
+# ────────────────────────────────────────────────
+# Usage:
+#   cp .env.docker .env.compose
+#   docker compose up --build
+# ────────────────────────────────────────────────
+
+services:
+  # ── MongoDB ──
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Backend (Express + Socket.IO) ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${PORT:-5000}:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/tictactoe_realtime
+      - JWT_SECRET=${JWT_SECRET:-change_this_to_a_random_64_char_string}
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:3000}
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # ── Frontend (Nginx + React SPA) ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL:-http://localhost:5000}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
